@@ -1,0 +1,28 @@
+<CustomWidget>:
+    height: 60
+    size_hint_y: None
+    Label:
+        id: label1
+        text: 'Hip Thrusts'
+    Button:
+        id: button1
+        text: 'Upadate Label'
+        on_press: root.update_label()
+    Button:
+        id: button2
+        text: '-'
+        on_press: root.remove()
+
+<Start>:
+    BoxLayout:
+        size_hint_y: 0.1
+        pos_hint: {'top': 1}
+        Button:
+            text: 'Add'
+            on_press: root.add_text_inputs()
+        Label:
+            text: "Exercises"
+    GridLayout:
+        cols:1
+        size_hint_y: 0.9
+        id: container

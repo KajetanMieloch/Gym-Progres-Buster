@@ -1,0 +1,60 @@
+#:import hex kivy.utils.get_color_from_hex
+#:import Button kivy.uix.button.Button
+MainScreen:
+<MainScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            Image:
+                source: "logo.png"
+                size_hint: None, None
+                size: 80, 80
+                pos_hint: {"center_x": .5}
+
+        MDBottomNavigation:
+            MDBottomNavigationItem:
+                name: 'screen 1'
+                text: 'Workouts'
+                icon: 'weight-lifter'
+                GridLayout:
+                    size: 200,100
+                    cols: 1
+                    rows: 4
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: self.width, 50
+
+                        MDLabel:
+                            text: "Title"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+
+                        MDSeparator:
+                            height: "1dp"
+
+                        MDLabel:
+                            text: "Body"
+
+            MDBottomNavigationItem:
+                name: 'screen 2'
+                text: 'Progress'
+                icon: 'chart-line'
+                MDLabel:
+                    text: 'Progress'
+                    halign: 'center'
+            MDBottomNavigationItem:
+                name: 'screen 3'
+                text: 'Settings'
+                icon: 'cog-outline'
+                MDLabel:
+                    text: 'Settings'
+                    halign: 'center'
+            MDBottomNavigationItem:
+                name: 'screen 4'
+                text: 'Tools'
+                icon: 'tools'
+                MDLabel:
+                    text: 'Tools'
+                    halign: 'center'
