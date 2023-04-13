@@ -25,6 +25,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.button import MDRectangleFlatIconButton
 from kivymd.uix.pickers import MDDatePicker
+from random import randint
 
 from datetime import date
 
@@ -35,6 +36,7 @@ kv = """
 #:import hex kivy.utils.get_color_from_hex
 #:import Button kivy.uix.button.Button
 #:import Factory kivy.factory.Factory
+#:import random random.random
 ScreenManager:
     Screen:
         name: 'MainScreen'
@@ -107,12 +109,13 @@ ScreenManager:
                             MDTextField:
                                 hint_text: "Add your exercise"
                                 id: exercise_name_input
+                                mode: "rectangle"
                                 size_hint_y: None
                             MDIconButton:
                                 id: addExercise_button
                                 icon: 'plus-circle-outline'
                                 icon_color: app.theme_cls.primary_color
-                                on_release: app.add_new_widget(exercise_name_input.text)
+                                on_release: app.add_new_widget(exercise_name_input.text), app.reset_input(exercise_name_input)
                                 size_hint_y: None
                 MDBottomNavigationItem:
                     name: 'Encyclopedia'
@@ -186,7 +189,7 @@ ScreenManager:
                     icon_color: app.theme_cls.primary_color
                     pos_hint: {'center_x': .9, 'center_y': .9}
                     size_hint: .2, .1
-                    on_release: app.visibility_handler([addExercise_button, exercise_name_input]), app.edit_button_handler_exercise_screen()
+                    on_release: app.visibility_handler([exercise_screen_grid])
             ScrollView:
                 id: exercise_screen_scroll
                 MDBoxLayout:
@@ -196,39 +199,57 @@ ScreenManager:
                     height: self.minimum_height
             
             GridLayout:
-                cols: 7
-                size_hint_y: 0.15
-                MDLabel:
-                    size_hint_x: 0.2
+                size_hint_y: 0.4
+                id: exercise_screen_grid
+                opacity: 0
+                disabled: True
+                rows: 2
+                GridLayout:
+                    rows: 1
+                    cols: 1
+                    size_hint_y: 0.15
+                    pos_hint_y: 0.15
+                    MDTextField:
+                        id: exercise_notes_input_exercise_screen
+                        hint_text: "notes"
+                        max_height: "125dp"
+                        mode: "rectangle"
+                        multiline: True
+                GridLayout:
+                    rows: 1
+                    cols: 7
+                    size_hint_y: 0.15
+                    MDLabel:
+                        size_hint_x: 0.2
+                        MDIconButton:
+                            icon: 'arrow-left'
+                            on_release: app.screen_change("MainScreen",reset=True,returnBtn=False)
+                    MDRaisedButton:
+                        text: "Date"
+                        on_release: app.show_date_picker()
+                    MDTextField:
+                        size_hint_x: 0.6
+                        hint_text: "Nmber of reps"
+                        id: exercise_reps_input_exercise_screen
+                        size_hint_y: None
+                        input_filter: 'int'
+                    MDLabel:
+                        size_hint_x: 0.1
+                    MDTextField:
+                        size_hint_x: 0.6
+                        hint_text: "Nmber of sets"
+                        id: exercise_sets_input_exercise_screen
+                        size_hint_y: None
+                        input_filter: 'int'
+                    MDSwitch:
+                        id: exercise_dirty_exercise_screen
+                        
                     MDIconButton:
-                        icon: 'arrow-left'
-                        on_release: app.screen_change("MainScreen",reset=True,returnBtn=False)
-                MDRaisedButton:
-                    text: "Date"
-                    on_release: app.show_date_picker()
-                MDTextField:
-                    size_hint_x: 0.6
-                    hint_text: "Nmber of reps"
-                    id: exercise_reps_input_exercise_screen
-                    size_hint_y: None
-                    input_filter: 'int'
-                MDLabel:
-                    size_hint_x: 0.1
-                MDTextField:
-                    size_hint_x: 0.6
-                    hint_text: "Nmber of sets"
-                    id: exercise_sets_input_exercise_screen
-                    size_hint_y: None
-                    input_filter: 'int'
-                MDSwitch:
-                    id: exercise_dirty_exercise_screen
-                    
-                MDIconButton:
-                    id: addExercise_button_exercise_screen
-                    icon: 'plus-circle-outline'
-                    icon_color: app.theme_cls.primary_color
-                    on_release: app.add_new_widget_exercise_screen(exercise_screen_top_app_bar_title.title,exercise_reps_input_exercise_screen.text,exercise_sets_input_exercise_screen.text,exercise_dirty_exercise_screen.active)
-                    size_hint_y: None
+                        id: addExercise_button_exercise_screen
+                        icon: 'plus-circle-outline'
+                        icon_color: app.theme_cls.primary_color
+                        on_release: app.add_new_widget_exercise_screen(exercise_screen_top_app_bar_title.title,exercise_reps_input_exercise_screen.text,exercise_sets_input_exercise_screen.text,exercise_dirty_exercise_screen.active,"0"), app.reset_input([exercise_reps_input_exercise_screen,exercise_sets_input_exercise_screen,exercise_dirty_exercise_screen])
+                        size_hint_y: None
                 
                    
                     
@@ -270,7 +291,9 @@ class DemoGPBApp(MDApp):
             self.add_new_widget((item[1]).get("text"), mode="load")
             self.countExercisess += 1
 
-        self.countExercisessScreen = 0
+        if(self.countExercisess == 0):
+            self.add_new_widget("Deafult", mode="add")
+        self.countExercisessScreen = 0        
         store = JsonStore("exercises.json")
         # Load all the exercises
         for item in store.find(name="Exercice"):
@@ -332,9 +355,11 @@ class DemoGPBApp(MDApp):
                 tupleResult, key=lambda x: x[1], reverse=True
             )
 
+
         self.activeExerciseList = list(zip(*activeExerciseSortTempList))
         self.activeExerciseList[0] = list(self.activeExerciseList[0])
         self.reload_exercises()
+
 
     def reload_exercises(self, *args):
         self.root.ids.exercise_box.clear_widgets()
@@ -343,7 +368,7 @@ class DemoGPBApp(MDApp):
 
     def add_new_widget(self, text, mode="add", *args):
 
-        if text == "":
+        if text == "" or text in self.activeExerciseList[1]:
             return
 
         store = JsonStore("save.json")
@@ -372,16 +397,17 @@ class DemoGPBApp(MDApp):
         )
         boxlayout.add_widget(removeAndInfo_button)
 
-        if mode != "reload":
-            self.activeExerciseList[0].append(boxlayout)
+        self.activeExerciseList[0].append(boxlayout)
+
 
         self.root.ids.exercise_box.add_widget(boxlayout)
 
-        if mode != "load" and mode != "reload":
+        if mode != "load":
             store.put(name="Exercice", text=text, key=self.countExercisess)
             self.countExercisess += 1
 
         # On adding new element, show remove button
+
         if mode != "load":
             for widget in self.activeExerciseList[0]:
                 widget.children[0].icon = "delete"
@@ -412,18 +438,17 @@ class DemoGPBApp(MDApp):
             try:
                 self.root.ids.exercise_box.remove_widget(widgetToRemove)
                 self.countExercisess -= 1
-                store.delete(str(self.countExercisess))
+                for item in store.find(text=widgetToRemove.children[1].text):
+                    store.delete(item[0])
                 self.activeExerciseList[0].remove(widgetToRemove)
                 self.activeExerciseList[1].remove(widgetToRemove.children[1].text)
             except:
                 pass
 
-        return super().on_start()
 
     def edit_button_handler(self, *args):
         # On start hide the edit section
         if self.flagEdit_button:
-
             for widget in self.activeExerciseList[0]:
                 # Change to delete button
                 widget.children[0].icon = "delete"
@@ -450,7 +475,13 @@ class DemoGPBApp(MDApp):
 
         self.flagEdit_button = not self.flagEdit_button
 
-        return super().on_start()
+
+    def reset_input(self, input,*args):
+        if type(input) == list:
+            for i in input:
+                i.text = ""
+        else:
+            input.text = ""
 
     def screen_change(
         self,
@@ -472,6 +503,7 @@ class DemoGPBApp(MDApp):
                     (item[1]).get("reps"),
                     (item[1]).get("sets"),
                     (item[1]).get("dirty"),
+                    str((item[1]).get("id")),
                     (item[1]).get("date"),
                     "load",
                 )
@@ -483,7 +515,7 @@ class DemoGPBApp(MDApp):
         # self.add_new_widget_exercise_screen(infoTitle)
 
     def add_new_widget_exercise_screen(
-        self, title, reps, sets, dirty, date="" , mode="add", *args
+        self, title, reps, sets, dirty,idOfEx, date="" , mode="add", *args
     ):
         if(reps == "" or sets == "" or dirty == ""):
             return
@@ -493,7 +525,7 @@ class DemoGPBApp(MDApp):
         sv_height = self.root.ids.exercise_screen_scroll.height
 
         gridlayout = MDGridLayout(
-            cols=4, rows=1, size_hint=(1, None), height=50, _md_bg_color="#2f2f2f"
+            cols=5, rows=1, size_hint=(1, None), height=50, _md_bg_color="#2f2f2f", id=idOfEx
         )
         if(mode == "add"):
             gridlayout.add_widget(
@@ -553,14 +585,20 @@ class DemoGPBApp(MDApp):
                     halign="center",
                 )
             )
+        gridlayout.add_widget(
+            MDIconButton(
+                icon="delete",
+                pos_hint={"center_x": 0.5, "center_y": 0.5},
+                on_release=partial(self.remove_exercise, gridlayout),
+            )
+        )
 
-        if mode != "reload":
-            # self.activeExerciseScreenList[0].append(boxLayaout)
-            self.activeExerciseScreenList.append(gridlayout)
+        # self.activeExerciseScreenList[0].append(boxLayaout)
+        self.activeExerciseScreenList.append(gridlayout)
 
         self.root.ids.exercise_screen_box.add_widget(gridlayout)
 
-        if mode != "load" and mode != "reload":
+        if mode != "load":
             store.put(
                 name="Exercice",
                 reps=reps,
@@ -569,6 +607,7 @@ class DemoGPBApp(MDApp):
                 title=title,
                 date = self.date,
                 key=self.countExercisessScreen,
+                id=randint(1000, 10000000),
             )
             self.countExercisessScreen += 1
 
@@ -619,6 +658,26 @@ class DemoGPBApp(MDApp):
             self.root.ids.edit_button.icon = "circle-edit-outline"
 
         self.flagEdit_button = not self.flagEdit_button
+
+    def remove_exercise(self, widgetsToRemove, *args):
+
+            print("remove_exercise")
+            store = JsonStore("exercises.json")
+            if type(widgetsToRemove) != list:
+                widgetsToRemove = [widgetsToRemove]
+
+            for widgetToRemove in widgetsToRemove:
+                try:
+                    self.root.ids.exercise_screen_box.remove_widget(widgetToRemove)
+                    self.countExercisessScreen -= 1
+                    print(widgetToRemove.id)
+                    for item in store.find(id=int(widgetToRemove.id)):
+                        print(item)
+                        store.delete(item[0])
+                    self.activeExerciseList[0].remove(widgetToRemove)
+                    self.activeExerciseList[1].remove(widgetToRemove.children[1].text)
+                except:
+                    pass
 
     def on_save(self, instance, value, date_range):
             '''
