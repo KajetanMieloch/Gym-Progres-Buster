@@ -110,6 +110,7 @@ ScreenManager:
                                 hint_text: "Add your exercise"
                                 id: exercise_name_input
                                 mode: "rectangle"
+                                max_text_length: 20
                                 size_hint_y: None
                             MDIconButton:
                                 id: addExercise_button
@@ -368,7 +369,7 @@ class DemoGPBApp(MDApp):
 
     def add_new_widget(self, text, mode="add", *args):
 
-        if text == "" or text in self.activeExerciseList[1]:
+        if text == "" or text in self.activeExerciseList[1] or len(text) > 20:
             return
 
         store = JsonStore("save.json")
