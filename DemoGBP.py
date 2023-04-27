@@ -31,6 +31,12 @@ from datetime import date
 
 from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 
+from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
+from kivy.app import App
+from matplotlib.figure import Figure
+from kivy.uix.boxlayout import BoxLayout
+import matplotlib.pyplot as plt
+
 
 kv = """
 #:import hex kivy.utils.get_color_from_hex
@@ -110,7 +116,6 @@ ScreenManager:
                                 hint_text: "Add your exercise"
                                 id: exercise_name_input
                                 mode: "rectangle"
-                                max_text_length: 20
                                 size_hint_y: None
                             MDIconButton:
                                 id: addExercise_button
@@ -129,28 +134,76 @@ ScreenManager:
                     name: 'Progress'
                     text: 'Progress'
                     icon: 'chart-line'
-                    MDLabel:
-                        text: 'Progress'
-                        halign: 'center'
+                    on_tab_press: app.progress_load_widgets()
+                    ScrollView:
+                        id: progress_scroll
+                        MDBoxLayout:
+                            id: progress_box
+                            orientation: 'vertical'
+                            size_hint_y: None
+                            height: self.minimum_height
                 MDBottomNavigationItem:
                     name: 'Settings'
                     text: 'Settings'
                     icon: 'cog-outline'
-                    MDLabel:
-                        text: 'Settings'
-                        halign: 'center'
+                    GridLayout:
+                        cols: 1
+                        rows: 3
+                        MDTextField:
+                            hint_text: "Add your exercise"
+                            mode: "rectangle"
+                            opacity: 0
+                            size_hint_y: None
+                        MDTextField:
+                            id: weight_input
+                            hint_text: "Weight in kg"
+                            mode: "rectangle"
+                            size_hint_y: None
+                            onChanged: app.save_settings("weight", self.text)
+                        MDTextField:
+                            id: height_input
+                            hint_text: "Height in cm"
+                            mode: "rectangle"
+                            size_hint_y: None
+                            onChanged: app.save_settings("height", self.text)
                 MDBottomNavigationItem:
                     name: 'Tools'
                     text: 'Tools'
                     icon: 'tools'
-                    MDLabel:
-                        text: 'Tools'
-                        halign: 'center'
+                    GridLayout:
+                        cols: 1
+                        rows: 2
+                        GridLayout:
+                            cols: 1
+                            rows: 1
+                            size_hint_y: 0.1
+                            MDLabel:
+                                text: "One Rep Max Calculator"
+                        GridLayout:
+                            cols: 2
+                            rows: 2
+                            MDTextField:
+                                id: weight_calc_input
+                                mode: "rectangle"
+                                hint_text: "Weight"
+                            MDTextField:
+                                id: reps_calc_input
+                                mode: "rectangle"
+                                hint_text: "Reps"
+                            MDTextField:
+                                id: result_calc_input
+                                mode: "rectangle"
+                                hint_text: "Result"
+                            MDRectangleFlatIconButton:
+                                icon: 'calculator'
+                                text: "Calculate"
+                                on_release: app.calculate_one_rep_max(weight_calc_input.text, reps_calc_input.text)
+                            
+                        
     Screen:
         name: 'ExerciseScreen'
         MDBoxLayout:
             orientation: "vertical"
-
             MDTopAppBar:
                 id: exercise_screen_top_app_bar_title
                 title: ""
@@ -216,6 +269,7 @@ ScreenManager:
                         max_height: "125dp"
                         mode: "rectangle"
                         multiline: True
+                        onChanged: app.save_notes(self.text,exercise_screen_top_app_bar_title.title)
                 GridLayout:
                     rows: 1
                     cols: 7
@@ -224,7 +278,7 @@ ScreenManager:
                         size_hint_x: 0.2
                         MDIconButton:
                             icon: 'arrow-left'
-                            on_release: app.screen_change("MainScreen",reset=True,returnBtn=False)
+                            on_release: app.screen_change("MainScreen",reset=True,returnBtn=False), app.visibility_handler([addExercise_button, exercise_name_input])
                     MDRaisedButton:
                         text: "Date"
                         on_release: app.show_date_picker()
@@ -256,7 +310,6 @@ ScreenManager:
                     
 """
 
-
 class DemoGPBApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -285,6 +338,10 @@ class DemoGPBApp(MDApp):
         return Builder.load_string(kv)
 
     def on_start(self, *args):
+        
+        self.load_settings("height")
+        self.load_settings("weight")
+        
         self.countExercisess = 0
         store = JsonStore("save.json")
         # Load all the exercises
@@ -299,6 +356,7 @@ class DemoGPBApp(MDApp):
         # Load all the exercises
         for item in store.find(name="Exercice"):
             self.countExercisessScreen += 1
+
 
         # On start hide the edit section
         partial(
@@ -369,7 +427,7 @@ class DemoGPBApp(MDApp):
 
     def add_new_widget(self, text, mode="add", *args):
 
-        if text == "" or text in self.activeExerciseList[1] or len(text) > 20:
+        if text == "" or text in self.activeExerciseList[1]:
             return
 
         store = JsonStore("save.json")
@@ -495,6 +553,7 @@ class DemoGPBApp(MDApp):
     ):
         if reset:
             self.root.ids.exercise_screen_box.clear_widgets()
+            self.root.ids.exercise_notes_input_exercise_screen.text = "saving...."
 
         store = JsonStore("exercises.json")
         for item in store.find(name="Exercice"):
@@ -514,6 +573,8 @@ class DemoGPBApp(MDApp):
         self.root.ids.exercise_screen_top_app_bar_title.title = infoTitle
         # if(returnBtn):
         # self.add_new_widget_exercise_screen(infoTitle)
+        self.load_notes(infoTitle)
+
 
     def add_new_widget_exercise_screen(
         self, title, reps, sets, dirty,idOfEx, date="" , mode="add", *args
@@ -680,15 +741,121 @@ class DemoGPBApp(MDApp):
                 except:
                     pass
 
+    def save_notes(self,notes,title, *args):
+        if notes == "saving....":
+            return
+        item = None
+        store = JsonStore("notes.json")
+        for item in store.find(title=title):
+            item = item[0]
+        if item != None:
+            store.delete(item)
+            
+        if title !="":
+            store.put(
+                name="Notes",
+                title=title,
+                notes=notes,
+                key=randint(1000, 10000000),
+            )
+    
+    def load_notes(self,title, *args):
+        store = JsonStore("notes.json")
+        for item in store.find(title=title):
+            itemNewText = (item[1]).get("notes")
+            self.root.ids.exercise_notes_input_exercise_screen.text = itemNewText
+
+
+    def progress_load_widgets(self, *args):
+
+        self.root.ids.progress_box.clear_widgets()
+
+        store = JsonStore("save.json")
+        vp_height = self.root.ids.progress_scroll.viewport_size[1]
+        sv_height = self.root.ids.progress_scroll.height
+
+        rows = 1
+        
+        for item in store.find(name="Exercice"):
+            rows += 1
+        
+        # add a new widget (must have preset height)
+        gridlayout = MDGridLayout(
+            size_hint=(1, None), height=50, cols=1, rows=rows, spacing=5
+        )
+
+        for item in store.find(name="Exercice"):
+            gridlayout.add_widget(
+                MDLabel(
+                    text=(item[1]).get("text"),
+                    size_hint=(1, None),
+                    height=50,
+                    valign="center",
+                    halign="center",
+                )
+            )
+        
+        self.root.ids.progress_box.add_widget(gridlayout)
+
+        if vp_height > sv_height:  # otherwise there is no scrolling
+            # calculate y value of bottom of scrollview in the viewport
+            scroll = self.root.ids.exercise_scroll.scroll_y
+            bottom = scroll * (vp_height - sv_height)
+
+            # use Clock.schedule_once because we need updated viewport height
+            # this assumes that new widgets are added at the bottom
+            # so the current bottom must increase by the widget height to maintain position
+            Clock.schedule_once(partial(self.adjust_scroll, bottom), -1)
+
+    def progress_adjust_scroll(self, bottom, *args):
+        vp_height = self.root.ids.progress_scroll.viewport_size[1]
+        sv_height = self.root.ids.progress_scroll.height
+        self.root.ids.progress_scroll.scroll_y = bottom / (vp_height - sv_height)
+
+
+
+
+    def save_settings(self,title, value, *args):
+        if value == "":
+            return
+        item = None
+        store = JsonStore("settings.json")
+        for item in store.find(title=title):
+            item = item[0]
+        if item != None:
+            store.delete(item)
+            
+        if title !="":
+            store.put(
+                name="Settings",
+                title=title,
+                value=value,
+                key=randint(1000, 10000000),
+            )
+    
+    def load_settings(self,title, *args):
+        store = JsonStore("settings.json")
+        for item in store.find(title=title):
+            val = (item[1]).get("value")
+            if title == "height":
+                self.root.ids.height_input.text = val
+            if title == "weight":
+                self.root.ids.weight_input.text = val
+
+    def calculate_one_rep_max(self,weight,reps, *args):
+        if weight == "" or reps == "":
+            return
+        weight = int(weight)
+        reps = int(reps)
+        orm = weight/(1.0278-(0.0278*reps))
+        self.root.ids.result_calc_input.text = str(int(orm))
+
     def on_save(self, instance, value, date_range):
             '''
             Events called when the "OK" dialog box button is clicked.
-
             :type instance: <kivymd.uix.picker.MDDatePicker object>;
-
             :param value: selected date;
             :type value: <class 'datetime.date'>;
-
             :param date_range: list of 'datetime.date' objects in the selected range;
             :type date_range: <class 'list'>;
             '''
