@@ -8,6 +8,8 @@ from kivy.core.window import Window
 from kivy.uix.label import Label
 from functools import partial
 
+import os.path
+
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -35,8 +37,11 @@ from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivy.app import App
 from matplotlib.figure import Figure
 from kivy.uix.boxlayout import BoxLayout
+import numpy as np
 import matplotlib.pyplot as plt
+from kivy.uix.image import Image
 
+from datetime import datetime
 
 kv = """
 #:import hex kivy.utils.get_color_from_hex
@@ -137,11 +142,13 @@ ScreenManager:
                     on_tab_press: app.progress_load_widgets()
                     ScrollView:
                         id: progress_scroll
-                        MDBoxLayout:
+                        MDGridLayout:
+                            rows: 0
+                            cols: 1
                             id: progress_box
-                            orientation: 'vertical'
                             size_hint_y: None
                             height: self.minimum_height
+                            spacing: 300
                 MDBottomNavigationItem:
                     name: 'Settings'
                     text: 'Settings'
@@ -260,9 +267,12 @@ ScreenManager:
                 rows: 2
                 GridLayout:
                     rows: 1
-                    cols: 1
+                    cols: 2
                     size_hint_y: 0.15
                     pos_hint_y: 0.15
+                    MDIconButton:
+                        icon: 'arrow-left'
+                        on_release: app.screen_change("MainScreen",reset=True,returnBtn=False), app.visibility_handler([addExercise_button, exercise_name_input])
                     MDTextField:
                         id: exercise_notes_input_exercise_screen
                         hint_text: "notes"
@@ -270,40 +280,42 @@ ScreenManager:
                         mode: "rectangle"
                         multiline: True
                         onChanged: app.save_notes(self.text,exercise_screen_top_app_bar_title.title)
+                        MDLabel:
+                            size_hint_x: 0.2
                 GridLayout:
-                    rows: 1
-                    cols: 7
-                    size_hint_y: 0.15
-                    MDLabel:
-                        size_hint_x: 0.2
-                        MDIconButton:
-                            icon: 'arrow-left'
-                            on_release: app.screen_change("MainScreen",reset=True,returnBtn=False), app.visibility_handler([addExercise_button, exercise_name_input])
-                    MDRaisedButton:
-                        text: "Date"
-                        on_release: app.show_date_picker()
+                    rows: 2
+                    cols: 3
+                    size_hint_y: 0.30
+                    MDTextField:
+                        id: exercise_weight_input_exercise_screen
+                        hint_text: "Weight"
+                        size_hint_x: 0.6
+                        size_hint_y: None
+                        input_filter: 'float'
                     MDTextField:
                         size_hint_x: 0.6
                         hint_text: "Nmber of reps"
                         id: exercise_reps_input_exercise_screen
                         size_hint_y: None
                         input_filter: 'int'
-                    MDLabel:
-                        size_hint_x: 0.1
                     MDTextField:
                         size_hint_x: 0.6
                         hint_text: "Nmber of sets"
                         id: exercise_sets_input_exercise_screen
                         size_hint_y: None
                         input_filter: 'int'
+                    MDRaisedButton:
+                        text: "Date"
+                        on_release: app.show_date_picker()
                     MDSwitch:
                         id: exercise_dirty_exercise_screen
-                        
+                        opacity: 0
+                        disabled: True  
                     MDIconButton:
                         id: addExercise_button_exercise_screen
                         icon: 'plus-circle-outline'
                         icon_color: app.theme_cls.primary_color
-                        on_release: app.add_new_widget_exercise_screen(exercise_screen_top_app_bar_title.title,exercise_reps_input_exercise_screen.text,exercise_sets_input_exercise_screen.text,exercise_dirty_exercise_screen.active,"0"), app.reset_input([exercise_reps_input_exercise_screen,exercise_sets_input_exercise_screen,exercise_dirty_exercise_screen])
+                        on_release: app.add_new_widget_exercise_screen(exercise_screen_top_app_bar_title.title,exercise_reps_input_exercise_screen.text,exercise_sets_input_exercise_screen.text,exercise_weight_input_exercise_screen.text,"0"), app.reset_input([exercise_reps_input_exercise_screen,exercise_sets_input_exercise_screen,exercise_weight_input_exercise_screen])
                         size_hint_y: None
                 
                    
@@ -318,6 +330,8 @@ class DemoGPBApp(MDApp):
         self.activeExerciseList = [[], []]
         self.activeExerciseScreenList = []
         self.date = str(date.today())
+        
+        self.dateAndPower = {}
 
         # Flags
         self.flagIsHidenEdit_uix = False
@@ -553,7 +567,7 @@ class DemoGPBApp(MDApp):
     ):
         if reset:
             self.root.ids.exercise_screen_box.clear_widgets()
-            self.root.ids.exercise_notes_input_exercise_screen.text = "saving...."
+            self.root.ids.exercise_notes_input_exercise_screen.text = "notes"
 
         store = JsonStore("exercises.json")
         for item in store.find(name="Exercice"):
@@ -562,7 +576,7 @@ class DemoGPBApp(MDApp):
                     infoTitle,
                     (item[1]).get("reps"),
                     (item[1]).get("sets"),
-                    (item[1]).get("dirty"),
+                    (item[1]).get("weight"),
                     str((item[1]).get("id")),
                     (item[1]).get("date"),
                     "load",
@@ -577,9 +591,10 @@ class DemoGPBApp(MDApp):
 
 
     def add_new_widget_exercise_screen(
-        self, title, reps, sets, dirty,idOfEx, date="" , mode="add", *args
+        self, title, reps, sets, weight,idOfEx, date="" , mode="add", *args
     ):
-        if(reps == "" or sets == "" or dirty == ""):
+        #here
+        if(reps == "" or sets == "" or weight == ""):
             return
         
         store = JsonStore("exercises.json")
@@ -611,6 +626,14 @@ class DemoGPBApp(MDApp):
             )
         gridlayout.add_widget(
             MDLabel(
+                text="Weight: " + str(weight),
+                size_hint=(1, None),
+                height=50,
+                valign="center",
+                halign="center",
+            ))
+        gridlayout.add_widget(
+            MDLabel(
                 text="Reps: " + str(reps),
                 size_hint=(1, None),
                 height=50,
@@ -627,26 +650,6 @@ class DemoGPBApp(MDApp):
                 halign="center",
             )
         )
-        if dirty:
-            gridlayout.add_widget(
-                MDLabel(
-                    text="Dirty",
-                    size_hint=(1, None),
-                    height=50,
-                    valign="center",
-                    halign="center",
-                )
-            )
-        else:
-            gridlayout.add_widget(
-                MDLabel(
-                    text="Clean",
-                    size_hint=(1, None),
-                    height=50,
-                    valign="center",
-                    halign="center",
-                )
-            )
         gridlayout.add_widget(
             MDIconButton(
                 icon="delete",
@@ -663,9 +666,9 @@ class DemoGPBApp(MDApp):
         if mode != "load":
             store.put(
                 name="Exercice",
+                weight=weight,
                 reps=reps,
                 sets=sets,
-                dirty=dirty,
                 title=title,
                 date = self.date,
                 key=self.countExercisessScreen,
@@ -767,7 +770,7 @@ class DemoGPBApp(MDApp):
 
 
     def progress_load_widgets(self, *args):
-
+      
         self.root.ids.progress_box.clear_widgets()
 
         store = JsonStore("save.json")
@@ -775,37 +778,44 @@ class DemoGPBApp(MDApp):
         sv_height = self.root.ids.progress_scroll.height
 
         rows = 1
-        
-        for item in store.find(name="Exercice"):
-            rows += 1
-        
-        # add a new widget (must have preset height)
-        gridlayout = MDGridLayout(
-            size_hint=(1, None), height=50, cols=1, rows=rows, spacing=5
-        )
 
         for item in store.find(name="Exercice"):
-            gridlayout.add_widget(
-                MDLabel(
-                    text=(item[1]).get("text"),
-                    size_hint=(1, None),
-                    height=50,
-                    valign="center",
-                    halign="center",
-                )
+            title = item[1].get("text")
+            gridlayout = MDGridLayout(
+                size_hint=(1, None), height=50, cols=1, rows=2, spacing=5
             )
-        
-        self.root.ids.progress_box.add_widget(gridlayout)
+
+            print("Wygenerowano",title + ".png")
+            self.root.ids.progress_box.rows = rows
+            self.show_graph(title)
+            image = Image(source=title+".png", size_hint=(1, None), height=300)
+            if os.path.exists(title + ".png"):
+                gridlayout.add_widget(
+                    MDLabel(
+                        text=title,
+                        size_hint=(1, None),
+                        height=50,
+                        valign="center",
+                        halign="center",
+                    )
+                )
+                gridlayout.add_widget(image)
+                self.root.ids.progress_box.add_widget(gridlayout)
+                rows += 1
+
+        rows += 1
+        self.root.ids.progress_box.rows = rows
+        self.root.ids.progress_box.add_widget(MDLabel(text=""))
 
         if vp_height > sv_height:  # otherwise there is no scrolling
             # calculate y value of bottom of scrollview in the viewport
-            scroll = self.root.ids.exercise_scroll.scroll_y
+            scroll = self.root.ids.progress_scroll.scroll_y
             bottom = scroll * (vp_height - sv_height)
 
             # use Clock.schedule_once because we need updated viewport height
             # this assumes that new widgets are added at the bottom
             # so the current bottom must increase by the widget height to maintain position
-            Clock.schedule_once(partial(self.adjust_scroll, bottom), -1)
+            Clock.schedule_once(partial(self.progress_adjust_scroll, bottom), -1)
 
     def progress_adjust_scroll(self, bottom, *args):
         vp_height = self.root.ids.progress_scroll.viewport_size[1]
@@ -842,12 +852,14 @@ class DemoGPBApp(MDApp):
             if title == "weight":
                 self.root.ids.weight_input.text = val
 
-    def calculate_one_rep_max(self,weight,reps, *args):
+    def calculate_one_rep_max(self,weight,reps,ret=False, *args):
         if weight == "" or reps == "":
             return
         weight = int(weight)
         reps = int(reps)
         orm = weight/(1.0278-(0.0278*reps))
+        if ret:
+            return orm
         self.root.ids.result_calc_input.text = str(int(orm))
 
     def on_save(self, instance, value, date_range):
@@ -870,6 +882,78 @@ class DemoGPBApp(MDApp):
         date_dialog.bind(on_save=self.on_save, on_cancel=self.on_cancel)
         date_dialog.open()
 
+    def calculate_power(self,date,weight, reps, sets, *args):
+        
+        try:
+            if int(sets) < 5:
+                self.dateAndPower[date] += round(self.calculate_one_rep_max(weight, reps, True) * float((sets+"."+sets)),2)
+            else:
+                self.dateAndPower[date] += round(self.calculate_one_rep_max(weight, reps, True) * float((sets+"."+"5")),2)
+        except:
+            if int(sets) < 5:
+                self.dateAndPower[date] = round(self.calculate_one_rep_max(weight, reps, True) * float((sets+"."+sets)),2)
+            else:
+                self.dateAndPower[date] = round(self.calculate_one_rep_max(weight, reps, True) * float((sets+"."+"5")),2)
+        
+    def sortDateStrArr(self, dates):
+       return sorted(dates, key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
+    
+    def show_graph(self, title, *args):
+        
+        store = JsonStore("exercises.json")
+        
+        for item in store.find(title=title):
+            self.calculate_power(item[1].get("date"),item[1].get("weight"), item[1].get("reps"), item[1].get("sets"))
+        
+        firstDate = 0
+        
+        xArray = []
+      
+        #TODO Y to będą wyniki calulate_power
+        #TODO https://stackoverflow.com/questions/3100985/plot-with-custom-text-for-x-axis-points
+
+        #Posortować po czasie, i dać wartości do X, zaczynając od 0
+        for r in self.sortDateStrArr(list(self.dateAndPower.keys())):
+            if firstDate == 0:
+                xArray.append(0)
+                prevDate = datetime.fromisoformat(r).timestamp()
+                firstDate = 1
+                continue
+            xArray.append(int((datetime.fromisoformat(r).timestamp() - prevDate)/100))
+
+        yArray = []
+        
+        for i in self.sortDateStrArr(list(self.dateAndPower.keys())):
+            yArray.append(self.dateAndPower[i])
+        
+        if len(xArray) == 0:
+            return
+        
+        x = np.array(xArray)
+        y = np.array(yArray)
+
+
+        x_smooth = np.linspace(x.min(), x.max(), 200)
+        y_smooth = np.interp(x_smooth, x, y)
+
+
+        # obliczanie współczynników prostej regresji
+        slope, intercept = np.polyfit(x, y, 1)
+
+        xPredGen = np.linspace(x.max(), x.max()+6000, 1500)
+
+        # generowanie punktów przewidywań
+        x_pred = np.array(xPredGen)
+        y_pred = slope * x_pred + intercept
+
+        # narysowanie wykresu
+        plt.scatter(x, y, color='blue')
+        plt.plot(x_pred, y_pred, color='blue', linestyle='dashed')
+        plt.plot(x_smooth, y_smooth, color='blue')
+        plt.title(title)
+        plt.savefig(title+".png")
+        plt.clf()
+        self.dateAndPower = {}
 
 if __name__ == "__main__":
     DemoGPBApp().run()
