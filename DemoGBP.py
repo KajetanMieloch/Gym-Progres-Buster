@@ -33,7 +33,6 @@ from datetime import date
 
 from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 
-from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivy.app import App
 from matplotlib.figure import Figure
 from kivy.uix.boxlayout import BoxLayout
@@ -132,9 +131,145 @@ ScreenManager:
                     name: 'Encyclopedia'
                     text: 'Encyclopedia'
                     icon: 'book-open-page-variant'
-                    MDLabel:
-                        text: 'Encyclopedia'
-                        halign: 'center'
+                    BoxLayout:
+                        orientation:'vertical'
+                        Label:
+                            text: 'CATEGORY'
+                            font_size: self.height/4
+                            size_hint: (1.0, 0.17)
+                        ScrollView:
+                            MDGridLayout:
+                                rows: 9
+                                cols: 1
+                                size_hint_y: None
+                                spacing: 110
+                                height: self.minimum_height
+                                MDGridLayout:
+                                    name: 'Chest'
+                                    rows: 1
+                                    cols: 2
+                                    Image:
+                                        source: "BP.jpg"
+                                        size_hint:(1, None)
+                                        height: 100
+                                        size_hint_x:None
+                                        width:100
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                    Label:
+                                        text: "Chest"
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                MDGridLayout:
+                                    name: 'Back'
+                                    rows: 1
+                                    cols: 2
+                                    Image:
+                                        source: "BP.jpg"
+                                        size_hint:(1, None)
+                                        height: 100
+                                        size_hint_x:None
+                                        width:100
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                    Label:
+                                        text: "Back"
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                MDGridLayout:
+                                    name: 'Shoulders'
+                                    rows: 1
+                                    cols: 2
+                                    Image:
+                                        source: "BP.jpg"
+                                        size_hint:(1, None)
+                                        height: 100
+                                        size_hint_x:None
+                                        width:100
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                    Label:
+                                        text: "Shoulders"
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                MDGridLayout:
+                                    name: 'Biceps'
+                                    rows: 1
+                                    cols: 2
+                                    Image:
+                                        source: "BP.jpg"
+                                        size_hint:(1, None)
+                                        height: 100
+                                        size_hint_x:None
+                                        width:100
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                    Label:
+                                        text: "Biceps"
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                MDGridLayout:
+                                    name: 'Triceps'
+                                    rows: 1
+                                    cols: 2
+                                    Image:
+                                        source: "BP.jpg"
+                                        size_hint:(1, None)
+                                        height: 100
+                                        size_hint_x:None
+                                        width:100
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                    Label:
+                                        text: "Triceps"
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                MDGridLayout:
+                                    name: 'Legs and Glutes'
+                                    rows: 1
+                                    cols: 2
+                                    Image:
+                                        source: "BP.jpg"
+                                        size_hint:(1, None)
+                                        height: 100
+                                        size_hint_x:None
+                                        width:100
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                    Label:
+                                        text: "Legs and Glutes"
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                MDGridLayout:
+                                    name: 'Forearms'
+                                    rows: 1
+                                    cols: 2
+                                    Image:
+                                        source: "BP.jpg"
+                                        size_hint:(1, None)
+                                        height: 100
+                                        size_hint_x:None
+                                        width:100
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                    Label:
+                                        text: "Forearms"
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                MDGridLayout:
+                                    name: 'Abs'
+                                    rows: 1
+                                    cols: 2
+                                    Image:
+                                        source: "BP.jpg"
+                                        size_hint:(1, None)
+                                        height: 100
+                                        size_hint_x:None
+                                        width:100
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                    Label:
+                                        text: "ABS"
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                MDGridLayout:
+                                    opacity: 0
+                                    rows: 1
+                                    cols: 2
+                                    Image:
+                                        source: "BP.jpg"
+                                        size_hint:(1, None)
+                                        height: 100
+                                        size_hint_x:None
+                                        width:100
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
+                                    Label:
+                                        text: "ABS"
+                                        on_touch_down: if self.collide_point(*args[1].pos): app.screen_change(self.parent.name, exercise_enclopedia=True, direction="left" )
                 MDBottomNavigationItem:
                     name: 'Progress'
                     text: 'Progress'
@@ -317,8 +452,283 @@ ScreenManager:
                         icon_color: app.theme_cls.primary_color
                         on_release: app.add_new_widget_exercise_screen(exercise_screen_top_app_bar_title.title,exercise_reps_input_exercise_screen.text,exercise_sets_input_exercise_screen.text,exercise_weight_input_exercise_screen.text,"0"), app.reset_input([exercise_reps_input_exercise_screen,exercise_sets_input_exercise_screen,exercise_weight_input_exercise_screen])
                         size_hint_y: None
+    Screen:
+        name: 'Chest'
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDTopAppBar:
+                title: "Chest"
+
+            ScrollView:
+                MDGridLayout:
+                    cols: 1
+                    rows: 18
+                    size_hint_y: None
+                    spacing: 200
+                    height: self.minimum_height
+                    
+                    MDGridLayout:
+                        opacity: 0
+                        margin: 10
+                        spacing: 80
+                        rows: 2
+                        cols: 1
+                        AnchorLayout:
+                            Image:
+                                source: "BP.jpg"
+                                size_hint:(1, None)
+                                height: 100
+                                size_hint_x:None
+                                width:100
+                        Label:
+                            valign: "middle"
+                            text: "Incline Dumbbell Bench Press"
+                    MDGridLayout:
+                        spacing: 80
+                        rows: 3
+                        cols: 1
+                        AnchorLayout:
+                            Image:
+                                source: "BP.jpg"
+                                size_hint:(1, None)
+                                height: 100
+                                size_hint_x:None
+                                width:100
+                                on_touch_down: if self.collide_point(*args[1].pos): Factory.IDBP().open()
+                        Label:
+                            valign: "middle"
+                            text: "Incline Dumbbell Bench Press"
+                    MDGridLayout:
+                        spacing: 80
+                        rows: 3
+                        cols: 1
+                        AnchorLayout:
+                            Image:
+                                source: "BP.jpg"
+                                size_hint:(1, None)
+                                height: 100
+                                size_hint_x:None
+                                width:100
+                                on_touch_down: if self.collide_point(*args[1].pos): Factory.IDBP().open()
+                        Label:
+                            valign: "middle"
+                            text: "Decline Dumbbell Bench Press"
+                    MDGridLayout:
+                        spacing: 80
+                        rows: 3
+                        cols: 1
+                        AnchorLayout:
+                            Image:
+                                source: "BP.jpg"
+                                size_hint:(1, None)
+                                height: 100
+                                size_hint_x:None
+                                width:100
+                                on_touch_down: if self.collide_point(*args[1].pos): Factory.IDBP().open()
+                        Label:
+                            valign: "middle"
+                            text: "Dumbbell Bench Press"
+                    MDGridLayout:
+                        spacing: 80
+                        rows: 3
+                        cols: 1
+                        AnchorLayout:
+                            Image:
+                                source: "BP.jpg"
+                                size_hint:(1, None)
+                                height: 100
+                                size_hint_x:None
+                                width:100
+                                on_touch_down: if self.collide_point(*args[1].pos): Factory.IDBP().open()
+                        Label:
+                            valign: "middle"
+                            text: "Dumbbell Flys"
+                        
+            
+            MDIconButton:
+                icon: 'arrow-left'
+                on_release: app.screen_change("MainScreen",reset=True)
                 
-                   
+            
+    
+    Screen:
+        name: 'Back'
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDTopAppBar:
+                title: "Back"
+
+            MDLabel:
+                text: "Content"
+                halign: "center"
+                
+            MDIconButton:
+                icon: 'arrow-left'
+                on_release: app.screen_change("MainScreen",reset=True)
+    
+    Screen:
+        name: 'Shoulders'
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDTopAppBar:
+                title: "Shoulders"
+
+            MDLabel:
+                text: "Content"
+                halign: "center"
+                
+            MDIconButton:
+                icon: 'arrow-left'
+                on_release: app.screen_change("MainScreen",reset=True)
+    
+    Screen:
+        name: 'Biceps'
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDTopAppBar:
+                title: "Biceps"
+
+            MDLabel:
+                text: "Content"
+                halign: "center"
+
+            MDIconButton:
+                icon: 'arrow-left'
+                on_release: app.screen_change("MainScreen",reset=True)
+        
+    Screen:
+        name: 'Triceps'
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDTopAppBar:
+                title: "Triceps"
+
+            MDLabel:
+                text: "Content"
+                halign: "center"
+
+            MDIconButton:
+                icon: 'arrow-left'
+                on_release: app.screen_change("MainScreen",reset=True)
+        
+    Screen:
+        name: 'Legs and Glutes'
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDTopAppBar:
+                title: "Legs and Glutes"
+
+            MDLabel:
+                text: "Content"
+                halign: "center"
+
+            MDIconButton:
+                icon: 'arrow-left'
+                on_release: app.screen_change("MainScreen",reset=True)
+            
+    Screen:
+        name: 'Forearms'
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDTopAppBar:
+                title: "Forearms"
+
+            MDLabel:
+                text: "Content"
+                halign: "center"
+
+            MDIconButton:
+                icon: 'arrow-left'
+                on_release: app.screen_change("MainScreen",reset=True)
+        
+    Screen:
+        name: 'Abs'
+        MDBoxLayout:
+            orientation: "vertical"
+
+            MDTopAppBar:
+                title: "ABS"
+
+            MDLabel:
+                text: "Content"
+                halign: "center"
+
+            MDIconButton:
+                icon: 'arrow-left'
+                on_release: app.screen_change("MainScreen",reset=True)
+   
+<IDBP@Popup>:
+    title: "Incline Dumbbell Bench Press"
+    auto_dismiss: False
+    MDBottomNavigation:
+
+        MDBottomNavigationItem:
+            name: "Movement Phases"
+            text: "Movement Phases"
+            
+            GridLayout:
+                cols: 1
+                rows: 2
+        
+                Image:
+                    source: "Icons/Encyclopedia/Incline-Dumbbell-Press.gif"
+                
+                Button:
+                    size_hint: 1, 0.1
+                    text: 'Close me!'
+                    on_release: root.dismiss()
+
+                
+        MDBottomNavigationItem:
+            name: "Working Muscles"
+            text: "Working Muscles"
+            
+            GridLayout:
+                cols: 1
+                rows: 2
+        
+                Image:
+                    source: "Icons/Encyclopedia/incline-presses-dumbbell_1.jpg"
+                
+                Button:
+                    size_hint: 1, 0.1
+                    text: 'Close me!'
+                    on_release: root.dismiss()
+
+        MDBottomNavigationItem:
+            name: "Execution"
+            text: "Execution"
+            
+            MDLabel:
+                multiline: True
+                do_wrap: True
+                text: "If your bench is adjustable, set the incline to between 30- to 45-degrees. The bigger the angle, the more the exercise will engage the shoulders. You'll want to select dumbbells that are lighter than you'd use for a flat dumbbell bench press and when performing a barbell incline press. If you're unsure of the right weight, start light and work your way up until you feel challenged but can still do an entire set using proper form."
+    
+            Button:
+                size_hint: 1, 0.1
+                text: 'Close me!'
+                on_release: root.dismiss()
+        
+        MDBottomNavigationItem:
+            name: "Comments"
+            text: "Comments"
+            
+            MDLabel:
+                multiline: True
+                do_wrap: True
+                text: "The best angle for an incline dumbbell press is about 30 degrees. However, this could differ based on your anatomy. As with any exercise, changing the incline is a useful way to switch up your training every few weeks and hit your muscles in new challenging ways."
+            
+            Button:
+                size_hint: 1, 0.1
+                text: 'Close me!'
+                on_release: root.dismiss()
                     
 """
 
@@ -563,8 +973,14 @@ class DemoGPBApp(MDApp):
         direction="left",
         reset=False,
         returnBtn=True,
+        exercise_enclopedia=False,
         *args
     ):
+        if exercise_enclopedia:
+            self.root.transition = SlideTransition(direction=direction, duration=0.25)
+            self.root.current = current
+            return
+        
         if reset:
             self.root.ids.exercise_screen_box.clear_widgets()
             self.root.ids.exercise_notes_input_exercise_screen.text = "notes"
@@ -745,7 +1161,7 @@ class DemoGPBApp(MDApp):
                     pass
 
     def save_notes(self,notes,title, *args):
-        if notes == "saving....":
+        if notes == "notes":
             return
         item = None
         store = JsonStore("notes.json")
@@ -951,9 +1367,20 @@ class DemoGPBApp(MDApp):
         plt.plot(x_pred, y_pred, color='blue', linestyle='dashed')
         plt.plot(x_smooth, y_smooth, color='blue')
         plt.title(title)
+        plt.ylabel('Power')
+        plt.xlabel('Date')
+        
+        my_xticks = self.sortDateStrArr(list(self.dateAndPower.keys()))
+        plt.xticks(x, my_xticks,rotation=45)
+        
+        plt.subplots_adjust(bottom=0.20)
+        
         plt.savefig(title+".png")
         plt.clf()
         self.dateAndPower = {}
+    
+    def test(self, text, *args):
+        print(text)
 
 if __name__ == "__main__":
     DemoGPBApp().run()
