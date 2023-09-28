@@ -1,18 +1,18 @@
 # Gym-Progres-Buster
-Aplikacja do maksymalizacji wyników na siłowni. Zapisuj swoje osiągnięcia i monitoruj swój postęp.
+An application for maximizing gym performance. Record your achievements and track your progress.
 
-## Funkcje
-### Dodawanie i usuwanie ćwiczeń
-Łatwe zarządzanie ćwiczeniami, które wykonujesz.
+## Features
+### Add and Remove Exercises
+Manage the exercises you perform easily.
 
 ![](https://i.imgur.com/wE2TSKb.png)
 
-### Zapisywanie postępów i notatek
-Do każdego ćwiczenia możesz zapisywać swoje wyniki, a także tworzyć notatki.
+### Save Progress and Notes
+Record your results for each exercise, and you can also take notes.
 
 ![](https://i.imgur.com/27bPWn7.png)
 
-### Monitorowanie postępów
-Sprawdzaj swoje osiągnięcia na wykresach stworzonych w narzędziu `matplotlib`. Wykresy zawierają prostą regresję, co pozwala zobaczyć ogólny kierunek twojego postępu.
+### Track Progress
+See your achievements on charts created with matplotlib. The charts include a simple regression, allowing you to observe the overall direction of your progress.
 
 ![](https://i.imgur.com/Ni91Aw1.png)
